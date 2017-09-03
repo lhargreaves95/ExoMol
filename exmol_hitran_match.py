@@ -6,11 +6,17 @@ import testing_ExoMol as tE
 
 
 # Filenames in HITRAN format
-filename_hitran = '/Users/laurahargreaves/Documents/ExoMol/new_HITRAN.txt'
-filename_exomol = '/Users/laurahargreaves/Documents/ExoMol/new_exomol.txt'
+# filename_hitran = '/Users/laurahargreaves/Documents/ExoMol/unmatched_no_parity.txt'
+# filename_exomol = '/Users/laurahargreaves/Documents/ExoMol/new_exomol.txt'
+#
+# output_final= 'output_relaxed_no_parity.txt'
+# output_unmatched = 'unmatched_relaxed_no_parity.txt'
 
-output_final= 'new_file.txt'
-output_unmatched = 'unmatched.txt'
+filename_hitran = '/Users/laurahargreaves/Documents/ExoMol/HITRAN_data.txt'
+filename_exomol = '/Users/laurahargreaves/Documents/ExoMol/exomol_test.txt'
+
+output_final= 'test_format.txt'
+output_unmatched = 'test_unmatched.txt'
 
 # Store contents of ExoMol data (that is in HITRAN format from ExoCross)
 with open(filename_hitran, 'r') as in_fp:
@@ -207,6 +213,20 @@ def check_frequency(frequency_hitran,frequency_exomol):
     else:
         return False
 
+def check_frequency_oneDp(frequency_hitran,frequency_exomol):
+
+    """
+    Function checks whether frequency in HITRAN and exomol match to 2 dp
+    :param frequency_hitran:
+    :param frequency_exomol:
+    :return: True if frequency matches to 2dp, otherwise false
+    """
+
+    if round(frequency_hitran,1) == round(frequency_exomol,1):
+        return True
+    else:
+        return False
+
 def check_j(j_hitran,j_exo):
 
     """
@@ -305,11 +325,41 @@ def check_match_param(query_upper_j,query_lower_j,query_lower_parity,query_upper
 
     return False, counter
 
+def check_match_param_relaxed(query_upper_j,query_lower_j,query_lower_parity,query_upper_parity,query_frequency,query_lower_QN,
+                      query_upper_QN,dataset):
+    """
+    Function checks whether parameters are equal
+    :param query_upper_j: ExoMol upper J state
+    :param query_lower_j: ExoMol lower J state
+    :param query_lower_parity: ExoMol lower parity state
+    :param query_upper_parity: ExoMol upper parity state
+    :param query_frequency: ExoMol frequency
+    :param query_lower_QN: ExoMol lower QN
+    :param query_upper_QN: ExoMol upper QN
+    :param dataset: HITRAN data set
+    :return:
+    """
 
+    counter = 0
+    matched_hitran = []
+    for row in dataset:
+        #use hitran functions here to obtain parameters
+        ref_lower_j, ref_upper_j = get_J_value_hitran(row)
+        ref_lower_parity = get_lower_parity_hitran(row)
+        ref_upper_parity = get_upper_parity_hitran(ref_lower_parity,row)
+        ref_frequency = get_freq_hitran(row)
+        ref_upper_qn, ref_lower_qn = get_quantum_number_n_hitran(row)
+        if ref_lower_j==query_lower_j and ref_upper_j==query_upper_j:
+            if ref_lower_parity == query_lower_parity and ref_upper_parity == query_upper_parity:
+                if check_frequency_oneDp(ref_frequency,query_frequency) == True:
+                    if ref_upper_qn == query_upper_QN and ref_lower_qn==query_lower_QN:
+                        return row, counter
+        counter = counter + 1
+
+    return False, counter
 
 new_exmol = []
 matched_hitran = []
-unmatched_hitran =[]
 
 with open(filename_exomol,'r') as in_fp:
     line = in_fp.readline()
@@ -320,7 +370,7 @@ with open(filename_exomol,'r') as in_fp:
             upper_parity, lower_parity = get_parity_exo(line)
             frequency = get_freq_exo(line)
             upper_qn, lower_qn = get_quantum_number_n_exo(line)
-            newline, counter = check_match_param(upper_j,lower_j,lower_parity,upper_parity,frequency,lower_qn,upper_qn,hitran_data)
+            newline, counter = check_match_param_relaxed(upper_j,lower_j,lower_parity,upper_parity,frequency,lower_qn,upper_qn,hitran_data)
 
         except TypeError:
             print("Line has different format")
@@ -330,7 +380,6 @@ with open(filename_exomol,'r') as in_fp:
             new_exmol.append(newline)
             matched_hitran.append(counter)
             # Print statements for the purpose of debugging
-            print(newline)
             print("line replaced")
         else:
             # Append ExoMol line if there is no match
@@ -338,7 +387,7 @@ with open(filename_exomol,'r') as in_fp:
             new_exmol.append(newline1)
         line = in_fp.readline()
 
-print(matched_hitran)
+#print(matched_hitran)
 # Store as output file
 with open(output_final, 'w') as my_file:
     for row in new_exmol:
@@ -359,14 +408,33 @@ def get_unmatched(hitran_data,matched_hitran):
 
     hitran_no= get_line_no(full_hitran)
 
-    unmatched_hitran = set(hitran_no) - set(matched_hitran)
+    unmatched_hitran = sorted(set(hitran_no) - set(matched_hitran))
 
     return unmatched_hitran
 
 
 unmatched_hitran = get_unmatched(hitran_data,matched_hitran)
 
-print(unmatched_hitran)
+def get_unmatched_lines(fullist,unmatched_list_no):
+
+    unmatched_list = []
+    counter = 0
+    for row in fullist:
+        for num in unmatched_list_no:
+            if counter == num:
+                unmatched_list.append(row)
+        counter = counter +1
+    return unmatched_list
+
+def make_file(filename,list):
+    with open(filename,'w') as new_file:
+        for row in list:
+            new_file.write(row)
+    return filename
+
+list=get_unmatched_lines(hitran_data,unmatched_hitran)
+
+make_file(output_unmatched,list)
 
 # with open(output_unmatched,'w') as un:
 #     for row in unmatched_hitran:

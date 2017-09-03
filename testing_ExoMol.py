@@ -292,6 +292,18 @@ def set_hitran_energy(energy,line):
 
     return new_line
 
+
+def local_qn(branch, localqn, parity):
+    local_quantum = [branch,localqn, parity]
+
+    string_local = branch+"" +localqn+parity+" "
+
+    #string_local = " ".join(str(x) for x in local_quantum)
+
+
+    return string_local
+
+
 def default_hitran(ExoCrossline):
 
     """
@@ -333,22 +345,28 @@ def default_hitran(ExoCrossline):
 
     local_upper = str(local_upper)
 
-    local_lower = str(local_lower)
+    local_lower = local_lower
 
     # not sure of the format of the following line
 
-    new_local_upper = branch + '  ' + local_upper + upper_parity + '     '
+    new_local_upper = local_qn(branch,local_upper,upper_parity)
 
-    new_local_lower = branch + '  ' + local_lower + lower_parity + '     '
+    new_local_lower = local_qn(branch,local_lower,lower_parity)
 
+    test1 = ' '
+    test2 = ' '
+    test3 = '10'
+    test4 = 'e'
     # line mixing flag needs to be discusses
 
     line_mixing_flag=' '
 
-    newline = FortranRecordWriter('(I2,I1,F12.6,E10.3,E10.3,F5.4,F5.3,F10.4,F4.2,F8.6,A15,A15,A15,A15,6I1,6I2,A1,F7.1,F7.1)')
+    #newline = FortranRecordWriter('(I2,I1,F12.6,E10.3,E10.3,F5.4,F5.3,F10.4,F4.2,F8.6,A15,A15,A15,A15,6I1,6I2,A1,F7.1,F7.1)')
+    newline = FortranRecordWriter(
+        '(I2,I1,F12.6,E10.3,E10.3,F5.4,F5.3,F10.4,F4.2,F8.6,A15,A15,10X,A5,5X,A1,I3,A1,A5,6I1,6I2,A1,F7.1,F7.1)')
 
     line1 = molecule_id, iso_id, frequency, intensity, einstein_coeff, broadening_air, broadeing_self, energy, n_air,\
-            delta_air, global_upper,global_lower,new_local_upper, new_local_lower, error_indices1, error_indices2,\
+            delta_air, global_upper,global_lower,test1,branch,local_lower,lower_parity,test2,error_indices1, error_indices2,\
             error_indices3, error_indices4, error_indices5, error_indices6,ref1, ref2, ref3, ref4,\
             ref5, ref6, line_mixing_flag, g_upper,g_lower
 
@@ -375,6 +393,7 @@ with open(testfile,'r') as in_fp:
 
 with open(test_out,'w') as my_file:
     for row in test_line:
+        print(row)
         my_file.write(row)
 
 
