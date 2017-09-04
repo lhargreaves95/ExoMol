@@ -15,6 +15,9 @@ import testing_ExoMol as tE
 filename_hitran = '/Users/laurahargreaves/Documents/ExoMol/HITRAN_data.txt'
 filename_exomol = '/Users/laurahargreaves/Documents/ExoMol/exomol_test.txt'
 
+match_hitran = 'matched_hitran.txt'
+match_exo = 'matched_exo.txt'
+
 output_final= 'test_format.txt'
 output_unmatched = 'test_unmatched.txt'
 
@@ -360,6 +363,8 @@ def check_match_param_relaxed(query_upper_j,query_lower_j,query_lower_parity,que
 
 new_exmol = []
 matched_hitran = []
+match_hitran_line = []
+match_exo_line = []
 
 with open(filename_exomol,'r') as in_fp:
     line = in_fp.readline()
@@ -371,7 +376,6 @@ with open(filename_exomol,'r') as in_fp:
             frequency = get_freq_exo(line)
             upper_qn, lower_qn = get_quantum_number_n_exo(line)
             newline, counter = check_match_param_relaxed(upper_j,lower_j,lower_parity,upper_parity,frequency,lower_qn,upper_qn,hitran_data)
-
         except TypeError:
             print("Line has different format")
             pass
@@ -379,6 +383,8 @@ with open(filename_exomol,'r') as in_fp:
             # Append HITRAN line if it matches ExoMol line (instead of ExoMol line)
             new_exmol.append(newline)
             matched_hitran.append(counter)
+            match_hitran_line.append(newline)
+            match_exo_line.append(line)
             # Print statements for the purpose of debugging
             print("line replaced")
         else:
@@ -393,6 +399,13 @@ with open(output_final, 'w') as my_file:
     for row in new_exmol:
         my_file.write(row)
 
+with open(match_hitran, 'w') as my_file:
+    for row in match_hitran_line:
+        my_file.write(row)
+
+with open(match_exo, 'w') as my_file:
+    for row in match_exo_line:
+        my_file.write(row)
 
 def get_unmatched(hitran_data,matched_hitran):
     """

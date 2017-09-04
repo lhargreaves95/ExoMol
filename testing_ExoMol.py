@@ -355,8 +355,6 @@ def default_hitran(ExoCrossline):
 
     test1 = ' '
     test2 = ' '
-    test3 = '10'
-    test4 = 'e'
     # line mixing flag needs to be discusses
 
     line_mixing_flag=' '
