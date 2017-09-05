@@ -96,6 +96,16 @@ def get_ref(line):
 
     return ref1, ref2, ref3, ref4, ref5, ref6
 
+def set_ref():
+    ref1 = 10
+    ref2 = 4
+    ref3 = 0
+    ref4 = 0
+    ref5 = 0
+    ref6 = 0
+
+    return ref1, ref2, ref3, ref4, ref5, ref6
+
 def get_id(line):
 
     """
@@ -243,6 +253,24 @@ def get_error_indices(line):
 
     return error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6
 
+def set_error():
+    """
+    Function sets error indices
+    :param l
+    :return: error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6
+
+    """
+
+    error_indices1 = 2
+    error_indices2 = 5
+    error_indices3 = 0
+    error_indices4 = 0
+    error_indices5 = 0
+    error_indices6 = 0
+
+    return error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6
+
+
 def get_g(line):
     """
     Function stores g upper and g lower
@@ -337,29 +365,17 @@ def default_hitran(ExoCrossline):
 
     upper_parity, lower_parity = get_parity_exo(ExoCrossline)
 
-    error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6 = get_error_indices(ExoCrossline)
+    error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6 = set_error()
 
-    ref1, ref2, ref3, ref4, ref5, ref6 = get_ref(ExoCrossline)
+    ref1, ref2, ref3, ref4, ref5, ref6 = set_ref()
 
     g_upper, g_lower = get_g(ExoCrossline)
 
-    local_upper = str(local_upper)
-
-    local_lower = local_lower
-
-    # not sure of the format of the following line
-
-    new_local_upper = local_qn(branch,local_upper,upper_parity)
-
-    new_local_lower = local_qn(branch,local_lower,lower_parity)
-
     test1 = ' '
     test2 = ' '
-    # line mixing flag needs to be discusses
 
     line_mixing_flag=' '
 
-    #newline = FortranRecordWriter('(I2,I1,F12.6,E10.3,E10.3,F5.4,F5.3,F10.4,F4.2,F8.6,A15,A15,A15,A15,6I1,6I2,A1,F7.1,F7.1)')
     newline = FortranRecordWriter(
         '(I2,I1,F12.6,E10.3,E10.3,F5.4,F5.3,F10.4,F4.2,F8.6,A15,A15,10X,A5,5X,A1,I3,A1,A5,6I1,6I2,A1,F7.1,F7.1)')
 
