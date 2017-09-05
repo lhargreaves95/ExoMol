@@ -31,6 +31,7 @@ def get_exo_energy(line):
 
 def magnitude(x):
     return int(math.log10(x))
+
 def round_energy(x):
     return int(round(x))
 
@@ -42,17 +43,19 @@ with open(match_exo,'r') as in_fp:
     exo_data = in_fp.readlines()
 
 def check_intensity_energy(list1,list2):
-
+    counter = 0
     for i in range(len(list1)):
         for ii in range(len(list2)):
             if i == ii:
                 if magnitude(get_intensity_hitran(list1[i]))==magnitude(get_intensity_exo(list2[ii])) and \
                                 round(get_hitran_energy(list1[i]))==round(get_exo_energy(list2[ii])):
-                    print("true")
+                else:
+                    counter += 1
 
-    return
+    return counter
 
-check_intensity_energy(hitran_data,exo_data)
+# Find instances where matched lines intensity and frequency have a large disparity
+counter = check_intensity_energy(hitran_data,exo_data)
 
 
 
