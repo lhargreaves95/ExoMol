@@ -74,11 +74,23 @@ def get_freq_hitran(line):
 
 def get_intensity_exo(line):
 
+    """
+    Get intensity of exomol line
+    :param line:
+    :return: intensity
+    """
+
     intensity = float(line[16:26])
 
     return intensity
 
 def get_intensity_hitran(line):
+
+    """
+    Get intensity of HITRAN line
+    :param line:
+    :return: intensity
+    """
 
     intensity = float(line[16:26])
 
@@ -125,11 +137,23 @@ def set_broadening(air,self):
 
 def get_exo_energy(line):
 
+    """
+    Get lower state energy E" for exomol line
+    :param line:
+    :return: energy
+    """
+
     energy = float(line[47:54])
 
     return energy
 
 def get_hitran_energy(line):
+
+    """
+     Get lower state energy E" for HITRAN line
+    :param line:
+    :return: energy
+    """
 
     energy = float(line[47:54])
 
@@ -262,6 +286,12 @@ def get_J_value_hitran(line):
 
 def get_branch_exo(line):
 
+    """
+    Get branch of ExoMol line using rigourous QN
+    :param line:
+    :return: branch (p,q,r)
+    """
+
     lower_j, upper_j = get_j_value_exo(line)
 
     if lower_j==upper_j:
@@ -364,20 +394,20 @@ def get_error_indices(line):
 
     return error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6
 
-def set_error():
+def set_error(error1,error2,error3,error4,error5,error6):
     """
     Function sets error indices
-    :param l
+    :param error(1:6)
     :return: error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6
 
     """
 
-    error_indices1 = 2
-    error_indices2 = 5
-    error_indices3 = 0
-    error_indices4 = 0
-    error_indices5 = 0
-    error_indices6 = 0
+    error_indices1 = error1
+    error_indices2 = error2
+    error_indices3 = error3
+    error_indices4 = error4
+    error_indices5 = error5
+    error_indices6 = error6
 
     return error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6
 
@@ -401,13 +431,23 @@ def get_ref(line):
 
     return ref1, ref2, ref3, ref4, ref5, ref6
 
-def set_ref():
-    ref1 = 10
-    ref2 = 4
-    ref3 = 0
-    ref4 = 0
-    ref5 = 0
-    ref6 = 0
+def set_ref(r1,r2,r3,r4,r5,r6):
+    """
+    Set references for line
+    :param r1:
+    :param r2:
+    :param r3:
+    :param r4:
+    :param r5:
+    :param r6:
+    :return: ref(1:6)
+    """
+    ref1 = r1
+    ref2 = r2
+    ref3 = r3
+    ref4 = r4
+    ref5 = r5
+    ref6 = r6
 
     return ref1, ref2, ref3, ref4, ref5, ref6
 
@@ -481,9 +521,9 @@ def default_hitran(ExoCrossline):
 
     upper_parity, lower_parity = get_parity_exo(ExoCrossline)
 
-    error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6 = set_error()
+    error_indices1, error_indices2, error_indices3, error_indices4, error_indices5, error_indices6 = set_error(2,5,0,0,0,0,0)
 
-    ref1, ref2, ref3, ref4, ref5, ref6 = set_ref()
+    ref1, ref2, ref3, ref4, ref5, ref6 = set_ref(10,4,0,0,0,0)
 
     g_upper, g_lower = get_g(ExoCrossline)
 
@@ -637,6 +677,7 @@ with open(filename_exomol,'r') as in_fp:
             upper_parity, lower_parity = get_parity_exo(line)
             frequency = get_freq_exo(line)
             upper_qn, lower_qn = get_quantum_number_n_exo(line)
+            # check parameters and line no of matched line
             newline, counter = check_match_param_relaxed(upper_j,lower_j,lower_parity,upper_parity,frequency,lower_qn,upper_qn,hitran_data)
         except TypeError:
             print("Line has different format")
@@ -644,20 +685,22 @@ with open(filename_exomol,'r') as in_fp:
         if newline:
             # Append HITRAN line if it matches ExoMol line (instead of ExoMol line)
             new_exmol.append(newline)
+            # Line no list of matched HITRAN lines
             matched_hitran.append(counter)
+            # Line list of matched HITRAN and ExoMol lines
             match_hitran_line.append(newline)
             match_exo_line.append(line)
             # Print statements for the purpose of debugging
             print("line replaced")
         else:
-            # Append ExoMol line if there is no match
+            # Append ExoMol line if there is no match and default to HITRAN format
             newline1 = default_hitran(line)
             new_exmol.append(newline1)
         line = in_fp.readline()
 
 
 # Section 4: Make new files of matched and unmatched lines
-# Section 4.1:
+# Section 4.1: Make files - output file, matched lines of HITRAN and exomol
 
 # Store as output file
 with open(output_final, 'w') as my_file:
@@ -672,9 +715,11 @@ with open(match_exo, 'w') as my_file:
     for row in match_exo_line:
         my_file.write(row)
 
+# Section 4.2 Check for unmatched lines
+
 def get_unmatched(hitran_data,matched_hitran):
     """
-    Function gets number of lines of HITRAN data which do not match ExoMol data base
+    Function gets line no of HITRAN lines which do not match ExoMol data base
     :param hitran_data:
     :param matched_hitran:
     :return: List of line numbers where
@@ -691,9 +736,13 @@ def get_unmatched(hitran_data,matched_hitran):
     return unmatched_hitran
 
 
-unmatched_hitran = get_unmatched(hitran_data,matched_hitran)
-
 def get_unmatched_lines(fullist,unmatched_list_no):
+    """
+
+    :param fullist:
+    :param unmatched_list_no:
+    :return: list of unmatched HITRAN lines
+    """
 
     unmatched_list = []
     counter = 0
@@ -704,12 +753,19 @@ def get_unmatched_lines(fullist,unmatched_list_no):
         counter = counter +1
     return unmatched_list
 
+
+# Make file function
 def make_file(filename,list):
     with open(filename,'w') as new_file:
         for row in list:
             new_file.write(row)
     return filename
 
+# get unmatched line no
+unmatched_hitran = get_unmatched(hitran_data,matched_hitran)
+
+# get list of unmatched lines
 list=get_unmatched_lines(hitran_data,unmatched_hitran)
 
+# make into file
 make_file(output_unmatched,list)
