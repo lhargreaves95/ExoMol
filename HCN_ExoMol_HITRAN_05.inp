@@ -1,0 +1,42 @@
+(This is an input to convert exomol to HITRAN)
+(export OMP_NUM_THREADS=4 < command line)
+
+Temperature  296.0 (K)
+Range 0.0  4001.0 (cm-1)
+
+stick
+
+hitran write
+   error-E  qn 4 ierr 2   vmax  100 
+   error-S  qn 4 ierr 5   vmax  100 
+   error-Air   ierr 0
+   error-self  ierr 0
+   error-n     ierr 0
+   error-delta ierr 0
+end
+
+absorption
+
+
+threshold 1e-30
+
+PF   8.952930E+02
+
+iso 231
+
+abundance 0.985114
+
+pressure  1.0
+species 
+     air   gamma 0.9999 n 0.99 t0 296.0  ratio 1.00 delta 0.999999
+     self  gamma 0.9999 n 0.99 t0 296.0  ratio 1.00 delta 0.999999
+end
+
+nram 10000
+Nprocs 4
+
+output HCN_HITRAN_231_05
+
+States 1H-12C-14N__Harris_-1.states
+
+Transitions  1H-12C-14N__Harris.trans
